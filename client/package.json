@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -25,6 +25,8 @@
     "md5": "^2.3.0",
     "normalize.css": "^8.0.1",
     "react": "^18.2.0",
+    "react-compare-image": "^3.5.12",
+    "react-compare-slider": "^3.1.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",

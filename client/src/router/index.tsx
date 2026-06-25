@@ -24,11 +24,12 @@ const [Login] = [() => import("../pages/Login")].map((item) => {
   });
 });
 
-const [Home, Friend, Personal, Todo] = [
+const [Home, Friend, Personal, Todo, Compare] = [
   () => import("../pages/Home"),
   () => import("../pages/Friend"),
   () => import("../pages/Personal"),
   () => import("../pages/Todo"),
+  () => import("../pages/Compare"),
 ].map((item) => {
   return loadable(item as any, {
     fallback: <Loading style={fillStyle} />,
@@ -50,6 +51,7 @@ function Router(): JSX.Element {
         <Route path="home" element={<Home />} />
         <Route path="friend" element={<Friend />} />
         <Route path="setting/personal" element={<Personal />}></Route>
+        <Route path="compare" element={<Compare />}></Route>
       </Route>
       <Route
         path="/user"
