@@ -1,173 +1,166 @@
-import { Button } from '@/components/ui/button';
-import { DraggablePopOver } from '@/components/block/DraggablePopOver';
-import { useState } from 'react';
-import { Toaster } from '@/components/ui/sonner';
-import { Input } from '@/components/ui/input';
-import { Send, Clipboard, BookOpen, Settings } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState, useRef, useCallback, cloneElement } from 'react';
+import './app.css';
+import { PopButton } from './PopButton';
+import Drawer from './Drawer';
+import { ExtensionStorage } from '@/utils/storage';
+import { ExtensionSettings } from '@/types/chrome';
 
-export default function PopoverApp(): React.ReactNode {
-    const [question, setQuestion] = useState('');
-    const [answer, setAnswer] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [clipboardText, setClipboardText] = useState('');
-    const [noteTitle, setNoteTitle] = useState('');
+// 创建透明图片用于消除拖拽鬼影
+const transparentImage = new Image();
+transparentImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAfFcJlAAAAABlBMVEX///8AAAAAAAABJRU5ErkJggg==';
 
-    const handleRagQuery = async () => {
-        if (!question.trim()) return;
-        setIsLoading(true);
-        try {
-            const response = await chrome.runtime.sendMessage({
-                action: 'ragQuery',
-                data: { question: question.trim() }
-            });
-            if (response.success && response.data?.data?.answer) {
-                setAnswer(response.data.data.answer);
-            } else {
-                setAnswer('查询失败: ' + (response.error || '未知错误'));
-            }
-        } catch (error) {
-            setAnswer('查询失败: ' + (error as Error).message);
-        } finally {
-            setIsLoading(false);
-        }
+export function PopoverApp(): React.ReactNode {
+  const [isDragging, setIsDragging] = useState(false);
+  const [adsorption, setAdsorption] = useState<'left' | 'right'>('right');
+  const [position, setPosition] = useState({ x: 0, y: 100 });
+  const clonePosition = useRef({ x: 0, y: 0 });
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const cloneRef = useRef<HTMLDivElement | null>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
+
+  // 拖动开始
+  const handleDragStart = useCallback((e: React.DragEvent) => {
+    if (!dragRef.current) return;
+    const container = containerRef.current;
+    const rect = dragRef.current.getBoundingClientRect();
+
+    // 设置透明拖拽图像，消除鬼影
+    e.dataTransfer?.setDragImage(transparentImage, 0, 0);
+
+    // 创建克隆元素作为拖拽动画对象
+    const clone = dragRef.current.cloneNode(true) as HTMLDivElement;
+    clone.style.position = 'absolute';
+    clone.style.zIndex = '9999999';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    clone.style.opacity = '1';
+    clone.style.pointerEvents = 'none';
+    clone.style.left = '0px';
+    clone.style.top = '0px';
+    clone.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+    clone.style.transition = 'none';
+    container?.appendChild(clone);
+    cloneRef.current = clone;
+    offsetRef.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
     };
+    setIsDragging(true);
+  }, []);
 
-    const handleSaveClipboard = async () => {
-        if (!clipboardText.trim()) return;
-        try {
-            const pageInfo = await chrome.tabs.query({ active: true, currentWindow: true });
-            const pageUrl = pageInfo[0]?.url || '';
-            const pageTitle = pageInfo[0]?.title || '未知页面';
+  // 拖动进行中
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // e.preventDefault();
+    if (!cloneRef.current) return;
 
-            const response = await chrome.runtime.sendMessage({
-                action: 'saveWebContent',
-                data: {
-                    title: noteTitle || '网页摘录',
-                    content: clipboardText,
-                    pageUrl,
-                    pageTitle
-                }
-            });
+    const clone = cloneRef.current;
+    const offset = offsetRef.current;
 
-            if (response.success) {
-                setClipboardText('');
-                setNoteTitle('');
-            }
-        } catch (error) {
-            console.error('保存失败:', error);
-        }
-    };
+    // 更新克隆元素位置
+    const x = ~~(e.clientX - offset.x);
+    const y = ~~(e.clientY - offset.y);
+    if (x < 0 || y < 0) {
+      return;
+    }
+    clone.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    clonePosition.current.x = x;
+    clonePosition.current.y = y;
+    console.log('clonePosition', clonePosition.current);
+  }, []);
 
-    const handleGetSelection = async () => {
-        try {
-            const response = await chrome.runtime.sendMessage({
-                action: 'getSelection'
-            });
-            if (response.success && response.data) {
-                setClipboardText(response.data);
-            }
-        } catch (error) {
-            console.log('无法获取选中内容');
-        }
-    };
+  // 拖动结束
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    if (!cloneRef.current || !dragRef.current) return;
+    const x = ~~(e.clientX);
+    const y = ~~(e.clientY);
+    const clone = cloneRef.current;
+    const screenWidth = window.innerWidth;
+    const rect = dragRef.current.getBoundingClientRect();
+    const cloneRect = clone.getBoundingClientRect();
+    const offset = offsetRef.current;
+    const adsorptionRight = e.clientX > (screenWidth / 2);
+    const left = x - offset.x
+    const top = y - offset.y
+    clone.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    if (adsorptionRight) {
+      setAdsorption('right');
+    } else {
+      setAdsorption('left');
+    }
 
-    return (
-        <>
-            <DraggablePopOver width={360} initialPosition="right">
-                <Tabs defaultValue="qa" className="w-full">
-                    <TabsList className="w-full grid grid-cols-3 mb-4">
-                        <TabsTrigger value="qa" className="gap-1.5">
-                            <Send className="w-4 h-4" />
-                            <span className="text-xs">智能问答</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="clipboard" className="gap-1.5">
-                            <Clipboard className="w-4 h-4" />
-                            <span className="text-xs">划词保存</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="notes" className="gap-1.5">
-                            <BookOpen className="w-4 h-4" />
-                            <span className="text-xs">我的笔记</span>
-                        </TabsTrigger>
-                    </TabsList>
+    // 添加吸附动画
+    clone.animate(
+      [
+        { transform: `translate3d(${left}px, ${top}px, 0)` },
+        { transform: `translate3d(${adsorptionRight ? screenWidth - rect.width : 0}px, ${top}px, 0)` }
+      ],
+      {
+        duration: 150,
+        easing: 'ease-in-out'
+      }
+    ).finished.then(() => {
+      // 更新原元素位置
+      setPosition({
+        x: adsorptionRight ? screenWidth - rect.width : 0,
+        y: top
+      });
+      // offsetRef.current = { x: 0, y: 0 };
+      // 移除克隆元素
+      containerRef.current?.removeChild(clone);
+      cloneRef.current = null;
+      // 显示原元素
+      setIsDragging(false);
+    });
+  }, []);
 
-                    <TabsContent value="qa" className="space-y-3 pt-0">
-                        <Input
-                            placeholder="输入问题，从笔记中查找答案..."
-                            value={question}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuestion(e.target.value)}
-                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleRagQuery()}
-                        />
-                        <Button
-                            variant="default"
-                            onClick={handleRagQuery}
-                            disabled={isLoading}
-                            className="w-full"
-                        >
-                            {isLoading ? '查询中...' : '提问'}
-                        </Button>
-                        {answer && (
-                            <ScrollArea className="h-48 rounded-lg border">
-                                <div className="p-3 text-sm leading-relaxed">
-                                    {answer}
-                                </div>
-                            </ScrollArea>
-                        )}
-                    </TabsContent>
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
 
-                    <TabsContent value="clipboard" className="space-y-3 pt-0">
-                        <Button variant="outline" onClick={handleGetSelection} className="w-full">
-                            获取选中内容
-                        </Button>
-                        <Input
-                            placeholder="笔记标题"
-                            value={noteTitle}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNoteTitle(e.target.value)}
-                        />
-                        <textarea
-                            className="w-full h-32 px-3 py-2 rounded-lg border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring/50"
-                            placeholder="选中的网页内容..."
-                            value={clipboardText}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setClipboardText(e.target.value)}
-                        />
-                        <Button
-                            variant="default"
-                            onClick={handleSaveClipboard}
-                            className="w-full"
-                            disabled={!clipboardText.trim()}
-                        >
-                            保存到笔记
-                        </Button>
-                    </TabsContent>
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
-                    <TabsContent value="notes" className="space-y-3 pt-0">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">笔记列表</span>
-                            <Button variant="ghost" size="sm" className="gap-1">
-                                <Settings className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        <ScrollArea className="h-64 rounded-lg border">
-                            <div className="p-3 space-y-2">
-                                <div className="px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
-                                    <div className="text-sm font-medium">欢迎使用</div>
-                                    <div className="text-xs text-muted-foreground mt-1">2024-01-01</div>
-                                </div>
-                                <div className="px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
-                                    <div className="text-sm font-medium">使用指南</div>
-                                    <div className="text-xs text-muted-foreground mt-1">2024-01-02</div>
-                                </div>
-                                <div className="px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
-                                    <div className="text-sm font-medium">知识库介绍</div>
-                                    <div className="text-xs text-muted-foreground mt-1">2024-01-03</div>
-                                </div>
-                            </div>
-                        </ScrollArea>
-                    </TabsContent>
-                </Tabs>
-            </DraggablePopOver>
-            <Toaster />
-        </>
-    );
+  const toggleSidePanel = () => {
+    const newValue = !isSidePanelOpen;
+    setIsSidePanelOpen(newValue);
+    chrome.runtime.sendMessage({
+      action: "toggleSidePanel",
+      data: newValue
+    }).then(response => {
+      console.log('toggleSidePanel response:', response);
+    }).catch(err => {
+      console.error("切换侧边栏失败", err);
+    });
+  };
+
+  return (
+    <div draggable ref={containerRef} className='drag-animation-container'
+      style={{
+        width: isDragging ? '100vw' : '0',
+        height: isDragging ? '100vh' : '0',
+        left: 0,
+        top: 0
+      }} >
+      <div
+        ref={dragRef}
+        className='drag-animation'
+        id="mount"
+        draggable
+        onDragStart={handleDragStart}
+        onDrag={handleMouseMove}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        style={{
+          top: position.y,
+          left: position.x,
+          transform: 'translate3d(0, 0, 0)',
+          opacity: isDragging ? 0 : 1,
+        }}
+      >
+        <PopButton icon="&#xe601;" onClick={() => toggleSidePanel()}></PopButton>
+        <Drawer trigger={<PopButton icon="&#xe601;"></PopButton>} />
+      </div>
+    </div>
+  );
 }

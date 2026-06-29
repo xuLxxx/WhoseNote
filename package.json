@@ -5,7 +5,8 @@
     "client": "cd client && npm run dev",
     "api": "cd api && npm run dev",
     "app": "cd app && npx expo start",
-    "dev": "concurrently \"npm run client\" \"npm run api\""
+    "plugin": "cd plugin && npm run dev",
+    "dev": "concurrently \"npm run client\" \"cd .. && npm run api\" \"cd .. && npm run plugin\""
   },
   "author": "HAHA-1314",
   "license": "MIT",

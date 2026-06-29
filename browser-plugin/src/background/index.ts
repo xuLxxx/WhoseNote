@@ -4,23 +4,25 @@ import { ExtensionStorage } from '../utils/storage';
 // 插件安装时初始化
 chrome.runtime.onInstalled.addListener(async () => {
     console.log('React 插件已安装');
-
-    // 初始化默认设置
-    await ExtensionStorage.saveSettings({
-        enabled: true,
-        theme: 'light',
-        fontSize: 14,
-        highlightColor: '#ffff00'
-    });
 });
 
 // 监听来自其他脚本的消息
 chrome.runtime.onMessage.addListener(
     (message: ExtensionMessage, sender, sendResponse) => {
+        console.log('Received message:', message);
         handleMessage(message, sender, sendResponse);
         return true; // 保持消息通道开启
     }
 );
+
+chrome.contextMenus.create({
+    id: "searchBaidu",
+    title: "使用百度搜索：%s",
+    contexts: ["selection"],
+    onclick: function (info) {
+        window.open("https://www.baidu.com/s?wd=" + info.selectionText);
+    }
+});
 
 async function handleMessage(
     message: ExtensionMessage,
@@ -43,6 +45,20 @@ async function handleMessage(
                 const currentSettings = await ExtensionStorage.getSettings();
                 await ExtensionStorage.setEnabled(!currentSettings.enabled);
                 sendResponse({ success: true, data: !currentSettings.enabled });
+                break;
+
+            case 'toggleSidePanel':
+                console.log('toggleSidePanel', message.data);
+                if (message.data) {
+                    chrome.sidePanel.open({
+                        windowId: sender.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT
+                    });
+                } else {
+                    chrome.sidePanel.close({
+                        windowId: sender.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT
+                    });
+                }
+                sendResponse({ success: true });
                 break;
 
             default:

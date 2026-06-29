@@ -1,4 +1,5 @@
 {
   "trae.tab.enableRename": false,
-  "trae.tab.enableAutoImport": false
+  "trae.tab.enableAutoImport": false,
+  "editor.tabSize": 2
 }

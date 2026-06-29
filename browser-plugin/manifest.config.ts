@@ -16,6 +16,7 @@ export default defineManifest({
         type: 'module',
     },
     action: {
+        default_title: 'Whose.Note',
         default_icon: {
             16: 'public/icons/icon16.png',
             32: 'public/icons/icon32.png',
@@ -29,13 +30,15 @@ export default defineManifest({
     },
     content_scripts: [{
         js: ['src/content/main.tsx', 'src/content/index.ts'],
-        matches: ['https://*/*'],
+        matches: ['<all_urls>'],
+        run_at: 'document_end',
     }],
     permissions: [
         'sidePanel',
         'tabs',
         'storage',
         'contentSettings',
+        'contextMenus',
     ],
     side_panel: {
         default_path: 'src/sidepanel/index.html',

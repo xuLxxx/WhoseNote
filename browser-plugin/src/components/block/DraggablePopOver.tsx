@@ -1,158 +1,146 @@
-"use client"
+import { useState, useRef, useCallback, cloneElement } from 'react';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
+// 创建透明图片用于消除拖拽鬼影
+const transparentImage = new Image();
+transparentImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAfFcJlAAAAABlBMVEX///8AAAAAAAABJRU5ErkJggg==';
 
-interface DraggablePopOverProps {
-  className?: string;
-  children?: React.ReactNode;
-  width?: number;
-  snapThreshold?: number;
-  initialPosition?: { left: number; top: number } | "left" | "right";
-}
+export function DraggablePopOver(): React.ReactNode {
+  const [isDragging, setIsDragging] = useState(false);
+  const [adsorption, setAdsorption] = useState<'left' | 'right'>('right');
+  const [position, setPosition] = useState({ x: 0, y: 100 });
+  const clonePosition = useRef({ x: 0, y: 0 });
 
-export function DraggablePopOver({
-  className,
-  children,
-  width = 320,
-  snapThreshold = 100,
-  initialPosition = "right",
-}: DraggablePopOverProps) {
-  const [position, setPosition] = React.useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [isSnappedLeft, setIsSnappedLeft] = React.useState(false);
-  const [isSnappedRight, setIsSnappedRight] = React.useState(false);
-  const dragRef = React.useRef<{ startX: number; startY: number; startPositionX: number; startPositionY: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const cloneRef = useRef<HTMLDivElement | null>(null);
+  const offsetRef = useRef({ x: 0, y: 0 });
 
-  React.useEffect(() => {
-    const handleInitialPosition = () => {
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-      const top = Math.max(0, (screenHeight - 400) / 2);
+  // 拖动开始
+  const handleDragStart = useCallback((e: React.DragEvent) => {
+    if (!dragRef.current) return;
+    const container = containerRef.current;
+    const rect = dragRef.current.getBoundingClientRect();
 
-      if (initialPosition === "left") {
-        setPosition({ x: 0, y: top });
-        setIsSnappedLeft(true);
-        setIsSnappedRight(false);
-      } else if (initialPosition === "right") {
-        setPosition({ x: screenWidth - width, y: top });
-        setIsSnappedLeft(false);
-        setIsSnappedRight(true);
-      } else {
-        setPosition({ x: initialPosition.left, y: initialPosition.top });
-        setIsSnappedLeft(false);
-        setIsSnappedRight(false);
-      }
+    // 设置透明拖拽图像，消除鬼影
+    e.dataTransfer?.setDragImage(transparentImage, 0, 0);
+
+    // 创建克隆元素作为拖拽动画对象
+    const clone = dragRef.current.cloneNode(true) as HTMLDivElement;
+    clone.style.position = 'absolute';
+    clone.style.zIndex = '9999999';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    clone.style.opacity = '1';
+    clone.style.pointerEvents = 'none';
+    clone.style.left = '0px';
+    clone.style.top = '0px';
+    clone.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+    clone.style.transition = 'none';
+    container?.appendChild(clone);
+    cloneRef.current = clone;
+    offsetRef.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
     };
-
-    handleInitialPosition();
-    window.addEventListener("resize", handleInitialPosition);
-    return () => window.removeEventListener("resize", handleInitialPosition);
-  }, [width, initialPosition]);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
     setIsDragging(true);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startPositionX: position.x,
-      startPositionY: position.y,
-    };
-  };
+  }, []);
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || !dragRef.current) return;
+  // 拖动进行中
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // e.preventDefault();
+    if (!cloneRef.current) return;
 
-    const deltaX = e.clientX - dragRef.current.startX;
-    const deltaY = e.clientY - dragRef.current.startY;
+    const clone = cloneRef.current;
+    const offset = offsetRef.current;
+
+    // 更新克隆元素位置
+    const x = ~~(e.clientX - offset.x);
+    const y = ~~(e.clientY - offset.y);
+    if (x < 0 || y < 0) {
+      return;
+    }
+    clone.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    clonePosition.current.x = x;
+    clonePosition.current.y = y;
+    console.log('clonePosition', clonePosition.current);
+  }, []);
+
+  // 拖动结束
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    if (!cloneRef.current || !dragRef.current) return;
+    const x = ~~(e.clientX);
+    const y = ~~(e.clientY);
+    const clone = cloneRef.current;
     const screenWidth = window.innerWidth;
-
-    let newX = dragRef.current.startPositionX + deltaX;
-    let newY = dragRef.current.startPositionY + deltaY;
-
-    newX = Math.max(0, Math.min(screenWidth - width, newX));
-    newY = Math.max(0, Math.min(window.innerHeight - 400, newY));
-
-    setPosition({ x: newX, y: newY });
-    setIsSnappedLeft(false);
-    setIsSnappedRight(false);
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-
-    const screenWidth = window.innerWidth;
-    const centerX = screenWidth / 2;
-
-    if (position.x < snapThreshold) {
-      setPosition({ x: 0, y: position.y });
-      setIsSnappedLeft(true);
-      setIsSnappedRight(false);
-    } else if (position.x > screenWidth - width - snapThreshold) {
-      setPosition({ x: screenWidth - width, y: position.y });
-      setIsSnappedLeft(false);
-      setIsSnappedRight(true);
-    } else if (position.x < centerX) {
-      setPosition({ x: 0, y: position.y });
-      setIsSnappedLeft(true);
-      setIsSnappedRight(false);
+    const rect = dragRef.current.getBoundingClientRect();
+    const cloneRect = clone.getBoundingClientRect();
+    const offset = offsetRef.current;
+    const adsorptionRight = e.clientX > (screenWidth / 2);
+    const left = x - offset.x
+    const top = y - offset.y
+    clone.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    if (adsorptionRight) {
+      setAdsorption('right');
     } else {
-      setPosition({ x: screenWidth - width, y: position.y });
-      setIsSnappedLeft(false);
-      setIsSnappedRight(true);
+      setAdsorption('left');
     }
-  };
 
-  React.useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging]);
+    // 添加吸附动画
+    clone.animate(
+      [
+        { transform: `translate3d(${left}px, ${top}px, 0)` },
+        { transform: `translate3d(${adsorptionRight ? screenWidth - rect.width : 0}px, ${top}px, 0)` }
+      ],
+      {
+        duration: 150,
+        easing: 'ease-in-out'
+      }
+    ).finished.then(() => {
+      // 更新原元素位置
+      setPosition({
+        x: adsorptionRight ? screenWidth - rect.width : 0,
+        y: top
+      });
+      // offsetRef.current = { x: 0, y: 0 };
+      // 移除克隆元素
+      containerRef.current?.removeChild(clone);
+      cloneRef.current = null;
+      // 显示原元素
+      setIsDragging(false);
+    });
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
 
   return (
-    <div
-      className={cn(
-        "fixed z-50 rounded-lg shadow-2xl bg-background border border-border overflow-hidden",
-        isDragging && "cursor-grabbing shadow-3xl",
-        !isDragging && "cursor-grab",
-        className
-      )}
+    <div draggable ref={containerRef} className='drag-animation-container'
       style={{
-        width: width,
-        left: position.x,
-        top: position.y,
-        transition: isDragging ? "none" : "left 0.3s ease-out",
-      }}
-      onMouseDown={handleMouseDown}
-    >
-      <div className="flex items-center justify-between px-4 py-3 bg-muted/50 border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-destructive/80" />
-            <div className="w-2 h-2 rounded-full bg-amber-500/80" />
-            <div className="w-2 h-2 rounded-full bg-green-500/80" />
-          </div>
-          <span className="text-xs font-medium text-muted-foreground">
-            知识库助手
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          {isSnappedLeft && (
-            <span className="text-xs text-muted-foreground">已吸附左侧</span>
-          )}
-          {isSnappedRight && (
-            <span className="text-xs text-muted-foreground">已吸附右侧</span>
-          )}
+        width: isDragging ? '100vw' : '0',
+        height: isDragging ? '100vh' : '0',
+        left: 0,
+        top: 0
+      }} >
+      <div
+        ref={dragRef}
+        className='drag-animation'
+        draggable
+        onDragStart={handleDragStart}
+        onDrag={handleMouseMove}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        style={{
+          top: position.y,
+          left: position.x,
+          transform: 'translate3d(0, 0, 0)',
+          opacity: isDragging ? 0 : 1,
+        }}
+      >
+        <div>
+          111
         </div>
       </div>
-      <div className="p-4">{children}</div>
     </div>
   );
 }

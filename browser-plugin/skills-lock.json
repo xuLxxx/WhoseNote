@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "chrome-extensions": {
+      "source": "GoogleChrome/modern-web-guidance",
+      "sourceType": "github",
+      "skillPath": "skills/chrome-extensions/SKILL.md",
+      "computedHash": "d7013d109750435e4d9d94f969ea7016eebd498d461bf2afb93badf5e54f1e62"
+    },
+    "modern-web-guidance": {
+      "source": "GoogleChrome/modern-web-guidance",
+      "sourceType": "github",
+      "skillPath": "skills/modern-web-guidance/SKILL.md",
+      "computedHash": "27fc122e466b85a632827c808b45fa72321c849b327f80a1f208a68148b3858e"
+    }
+  }
+}
