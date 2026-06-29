@@ -14,7 +14,9 @@ const OptionsApp: React.FC = () => {
         enabled: true,
         theme: 'light',
         fontSize: 14,
-        highlightColor: '#ffff00'
+        highlightColor: '#ffff00',
+        position: { x: 0, y: 100 },
+        adsorption: 'left'
     });
 
     useEffect(() => {
@@ -53,7 +55,9 @@ const OptionsApp: React.FC = () => {
                 enabled: true,
                 theme: 'light',
                 fontSize: 14,
-                highlightColor: '#ffff00'
+                highlightColor: '#ffff00',
+                position: { x: 0, y: 100 },
+                adsorption: 'left'
             };
 
             await ExtensionStorage.saveSettings(defaultSettings);

@@ -12,7 +12,9 @@ const PopupApp: React.FC = () => {
     enabled: true,
     theme: 'light',
     fontSize: 14,
-    highlightColor: '#ffff00'
+    highlightColor: '#ffff00',
+    position: { x: 0, y: 100 },
+    adsorption: 'left'
   });
 
   const [pageInfo, setPageInfo] = useState<PageInfo | null>(null);

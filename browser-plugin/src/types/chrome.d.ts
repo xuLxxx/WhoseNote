@@ -21,12 +21,18 @@ export interface ExtensionResponse {
     error?: string;
 }
 
-// 存储数据类型
+export interface Position {
+    x: number;
+    y: number;
+}
+
 export interface ExtensionSettings {
     enabled: boolean;
     theme: 'light' | 'dark';
     fontSize: number;
     highlightColor: string;
+    position: Position;
+    adsorption: 'left' | 'right';
 }
 
 export interface PageInfo {

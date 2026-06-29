@@ -1,10 +1,15 @@
 @font-face {
-  font-family: 'iconfont';
+  font-family: "iconfont";
   /* Project id 4843413 */
-  src: url('//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff2?t=1746947794909') format('woff2'),
-    url('//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff?t=1746947794909') format('woff'),
-    url('//at.alicdn.com/t/c/font_4843413_zp757dp92pa.ttf?t=1746947794909') format('truetype'),
-    url('//at.alicdn.com/t/c/font_4843413_zp757dp92pa.svg?t=1746947794909#iconfont') format('svg');
+  src:
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff2?t=1746947794909")
+      format("woff2"),
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff?t=1746947794909")
+      format("woff"),
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.ttf?t=1746947794909")
+      format("truetype"),
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.svg?t=1746947794909#iconfont")
+      format("svg");
 }
 
 .iconfont {
@@ -120,8 +125,9 @@
 }
 
 #mount {
-  --font-family: system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu",
-    "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+  --font-family:
+    system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu", "Cantarell",
+    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
   /* PC/H5 兼容的字号、间距、圆角、阴影变量 */
   --f-12: 12px;
@@ -213,7 +219,6 @@
 }
 
 @media (max-width: 480px) {
-
   :root,
   #mount {
     --f-12: 10px;
@@ -260,12 +265,21 @@
   color: var(--color);
   -webkit-text-decoration: var(--text-decoration);
   text-decoration: var(--text-decoration);
-  transition: background-color var(--transition), color var(--transition),
-    box-shadow var(--transition), -webkit-text-decoration var(--transition);
-  transition: background-color var(--transition), color var(--transition),
-    text-decoration var(--transition), box-shadow var(--transition);
-  transition: background-color var(--transition), color var(--transition),
-    text-decoration var(--transition), box-shadow var(--transition),
+  transition:
+    background-color var(--transition),
+    color var(--transition),
+    box-shadow var(--transition),
+    -webkit-text-decoration var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition),
+    text-decoration var(--transition),
+    box-shadow var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition),
+    text-decoration var(--transition),
+    box-shadow var(--transition),
     -webkit-text-decoration var(--transition);
 }
 
@@ -286,7 +300,10 @@
   background-color: #fff;
   color: var(--primary, #ea4c89);
   cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
 }
 
 :where(#mount) button:hover {
@@ -368,8 +385,8 @@
   background-repeat: no-repeat;
 }
 
-[type="checkbox"]~label,
-[type="radio"]~label {
+[type="checkbox"] ~ label,
+[type="radio"] ~ label {
   display: inline-block;
   margin-right: 0.375em;
   margin-bottom: 0;
@@ -378,7 +395,8 @@
 
 .drag-animation-container {
   position: fixed;
-  opacity: 0.3;
+  opacity: 0.8;
+  width: var(--width-40);
   transition: opacity 0.1s ease;
 }
 
@@ -401,12 +419,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
-  /* max-height: var(--width-28); */
-  min-height: auto;
+  width: 100%;
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
-  border-radius: var(--infinity);
-  line-height: 0;
   padding: var(--space-4);
+  border-radius: var(--infinity);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  line-height: 0;
+  /* padding: var(--space-4); */
+}
+
+.pop-drawer {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

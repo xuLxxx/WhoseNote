@@ -1,19 +1,45 @@
-import { useState, useRef, useCallback, cloneElement } from 'react';
-import './app.css';
-import { PopButton } from './PopButton';
-import Drawer from './Drawer';
-import { ExtensionStorage } from '@/utils/storage';
-import { ExtensionSettings } from '@/types/chrome';
+import { useState, useRef, useCallback, useEffect } from "react";
+import "./app.css";
+import { PopButton } from "./PopButton";
+import { Drawer } from "./Drawer";
+import { ViewVerticalIcon } from "@radix-ui/react-icons";
+import { ExtensionStorage } from "@/utils/storage";
 
-// 创建透明图片用于消除拖拽鬼影
 const transparentImage = new Image();
-transparentImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAfFcJlAAAAABlBMVEX///8AAAAAAAABJRU5ErkJggg==';
+transparentImage.src =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAfFcJlAAAAABlBMVEX///8AAAAAAAABJRU5ErkJggg==";
 
 export function PopoverApp(): React.ReactNode {
+  const [isHidden, setIsHidden] = useState(true);
+  const mouseHover = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [adsorption, setAdsorption] = useState<'left' | 'right'>('right');
+  const [adsorption, setAdsorption] = useState<"left" | "right">("left");
+  const [loadingStorage, setLoadingStorage] = useState(true);
   const [position, setPosition] = useState({ x: 0, y: 100 });
   const clonePosition = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const loadPosition = async () => {
+      const savedPosition = await ExtensionStorage.getPosition();
+      const savedAdsorption = await ExtensionStorage.getAdsorption();
+      setPosition(savedPosition);
+      setAdsorption(savedAdsorption);
+      setLoadingStorage(false);
+    };
+    loadPosition();
+  }, []);
+
+  useEffect(() => {
+    if (!loadingStorage) {
+      ExtensionStorage.savePosition(position);
+    }
+  }, [position, loadingStorage]);
+
+  useEffect(() => {
+    if (!loadingStorage) {
+      ExtensionStorage.saveAdsorption(adsorption);
+    }
+  }, [adsorption, loadingStorage]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
@@ -31,21 +57,21 @@ export function PopoverApp(): React.ReactNode {
 
     // 创建克隆元素作为拖拽动画对象
     const clone = dragRef.current.cloneNode(true) as HTMLDivElement;
-    clone.style.position = 'absolute';
-    clone.style.zIndex = '9999999';
-    clone.style.width = rect.width + 'px';
-    clone.style.height = rect.height + 'px';
-    clone.style.opacity = '1';
-    clone.style.pointerEvents = 'none';
-    clone.style.left = '0px';
-    clone.style.top = '0px';
+    clone.style.position = "absolute";
+    clone.style.zIndex = "9999999";
+    clone.style.width = rect.width + "px";
+    clone.style.height = rect.height + "px";
+    clone.style.opacity = "1";
+    clone.style.pointerEvents = "none";
+    clone.style.left = "0px";
+    clone.style.top = "0px";
     clone.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
-    clone.style.transition = 'none';
+    clone.style.transition = "none";
     container?.appendChild(clone);
     cloneRef.current = clone;
     offsetRef.current = {
       x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      y: e.clientY - rect.top,
     };
     setIsDragging(true);
   }, []);
@@ -67,52 +93,53 @@ export function PopoverApp(): React.ReactNode {
     clone.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     clonePosition.current.x = x;
     clonePosition.current.y = y;
-    console.log('clonePosition', clonePosition.current);
   }, []);
 
   // 拖动结束
   const handleDragEnd = useCallback((e: React.DragEvent) => {
     if (!cloneRef.current || !dragRef.current) return;
-    const x = ~~(e.clientX);
-    const y = ~~(e.clientY);
+    const x = ~~e.clientX;
+    const y = ~~e.clientY;
     const clone = cloneRef.current;
     const screenWidth = window.innerWidth;
     const rect = dragRef.current.getBoundingClientRect();
     const cloneRect = clone.getBoundingClientRect();
     const offset = offsetRef.current;
-    const adsorptionRight = e.clientX > (screenWidth / 2);
-    const left = x - offset.x
-    const top = y - offset.y
+    const adsorptionRight = e.clientX > screenWidth / 2;
+    const left = x - offset.x;
+    const top = y - offset.y;
     clone.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     if (adsorptionRight) {
-      setAdsorption('right');
+      setAdsorption("right");
     } else {
-      setAdsorption('left');
+      setAdsorption("left");
     }
 
     // 添加吸附动画
-    clone.animate(
-      [
-        { transform: `translate3d(${left}px, ${top}px, 0)` },
-        { transform: `translate3d(${adsorptionRight ? screenWidth - rect.width : 0}px, ${top}px, 0)` }
-      ],
-      {
-        duration: 150,
-        easing: 'ease-in-out'
-      }
-    ).finished.then(() => {
-      // 更新原元素位置
-      setPosition({
-        x: adsorptionRight ? screenWidth - rect.width : 0,
-        y: top
+    clone
+      .animate(
+        [
+          { transform: `translate3d(${left}px, ${top}px, 0)` },
+          {
+            transform: `translate3d(${adsorptionRight ? screenWidth - rect.width : 0}px, ${top}px, 0)`,
+          },
+        ],
+        {
+          duration: 150,
+          easing: "ease-in-out",
+        },
+      )
+      .finished.then(() => {
+        // 更新原元素位置
+        setPosition({
+          x: 0,
+          y: top,
+        });
+        containerRef.current?.removeChild(clone);
+        cloneRef.current = null;
+        // 显示原元素
+        setIsDragging(false);
       });
-      // offsetRef.current = { x: 0, y: 0 };
-      // 移除克隆元素
-      containerRef.current?.removeChild(clone);
-      cloneRef.current = null;
-      // 显示原元素
-      setIsDragging(false);
-    });
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -124,42 +151,87 @@ export function PopoverApp(): React.ReactNode {
   const toggleSidePanel = () => {
     const newValue = !isSidePanelOpen;
     setIsSidePanelOpen(newValue);
-    chrome.runtime.sendMessage({
-      action: "toggleSidePanel",
-      data: newValue
-    }).then(response => {
-      console.log('toggleSidePanel response:', response);
-    }).catch(err => {
-      console.error("切换侧边栏失败", err);
-    });
+    chrome.runtime
+      .sendMessage({
+        action: "toggleSidePanel",
+        data: newValue,
+      })
+      .then((response) => {
+        console.log("toggleSidePanel response:", response);
+      })
+      .catch((err) => {
+        console.error("切换侧边栏失败", err);
+      });
+  };
+
+  const handleMouseEnter = () => {
+    setIsHidden(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHidden(true);
+  };
+
+  const hidePopOver = () => {
+    if (!mouseHover.current) setIsHidden(true);
   };
 
   return (
-    <div draggable ref={containerRef} className='drag-animation-container'
+    <div
+      draggable={!isHidden}
+      ref={containerRef}
+      className="drag-animation-container"
+      onMouseEnter={() => {
+        mouseHover.current = true;
+        handleMouseEnter();
+      }}
+      onMouseOut={() => {
+        mouseHover.current = false;
+      }}
+      onMouseLeave={() => {
+        mouseHover.current = false;
+        handleMouseLeave();
+      }}
       style={{
-        width: isDragging ? '100vw' : '0',
-        height: isDragging ? '100vh' : '0',
-        left: 0,
-        top: 0
-      }} >
+        display: loadingStorage ? "none" : "block",
+        transform: isHidden
+          ? adsorption === "right"
+            ? "translate3d(50%, 0, 0)"
+            : "translate3d(-50%, 0, 0)"
+          : "translate3d(0, 0, 0)",
+        width: isDragging ? "100vw" : "40px",
+        height: isDragging ? "100vh" : "0",
+        transition: "transform 0.3s ease-in-out",
+        left: adsorption === "left" ? 0 : "auto",
+        right: adsorption === "right" ? 0 : "auto",
+        top: 0,
+      }}
+    >
       <div
         ref={dragRef}
-        className='drag-animation'
+        className="drag-animation"
         id="mount"
-        draggable
+        draggable={!isHidden}
         onDragStart={handleDragStart}
         onDrag={handleMouseMove}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
         style={{
           top: position.y,
-          left: position.x,
-          transform: 'translate3d(0, 0, 0)',
+          left: adsorption === "left" ? 0 : "auto",
+          right: adsorption === "right" ? 0 : "auto",
+          transform: "translate3d(0, 0, 0)",
           opacity: isDragging ? 0 : 1,
         }}
       >
-        <PopButton icon="&#xe601;" onClick={() => toggleSidePanel()}></PopButton>
-        <Drawer trigger={<PopButton icon="&#xe601;"></PopButton>} />
+        <PopButton onClick={() => toggleSidePanel()}>
+          <ViewVerticalIcon style={{ width: "100%" }} />
+        </PopButton>
+        <Drawer
+          hidePopOver={hidePopOver}
+          trigger={<PopButton icon="&#xe601;"></PopButton>}
+          triggerClassName="pop-drawer"
+        />
       </div>
     </div>
   );
