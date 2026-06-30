@@ -1,30 +1,42 @@
 import type { ExtensionMessage, ExtensionResponse } from "../types/chrome";
 import { ExtensionStorage } from "../utils/storage";
 
+interface UserInfo {
+  islogin: boolean;
+  username: string;
+  avatar: string;
+}
+
+const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
+
+let userInfo: UserInfo = {
+  islogin: false,
+  username: "",
+  avatar: "",
+};
 // 插件安装时初始化
 chrome.runtime.onInstalled.addListener(async () => {
   console.log("React 插件已安装");
+  chrome.contextMenus.create({
+    id: "openSidePanel",
+    title: "Open side panel",
+    contexts: ["all"],
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "openSidePanel") {
+    // This will open the panel in all the pages on the current window.
+    chrome.sidePanel.open({
+      windowId: tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT,
+    });
+  }
 });
 
 // 监听来自其他脚本的消息
-chrome.runtime.onMessage.addListener(
-  (message: ExtensionMessage, sender, sendResponse) => {
-    console.log("Received message:", message);
-    handleMessage(message, sender, sendResponse);
-    return true; // 保持消息通道开启
-  },
-);
-
-chrome.contextMenus.create({
-  id: "openSidePanel",
-  title: "打开侧边栏",
-  contexts: ["page"],
-  onclick: async function () {
-    const currentWindow = await chrome.windows.getCurrent();
-    chrome.sidePanel.open({
-      windowId: currentWindow.id ?? chrome.windows.WINDOW_ID_CURRENT,
-    });
-  },
+chrome.runtime.onMessage.addListener((message: ExtensionMessage, sender, sendResponse) => {
+  handleMessage(message, sender, sendResponse);
+  return true; // 保持消息通道开启
 });
 
 async function handleMessage(
@@ -51,7 +63,6 @@ async function handleMessage(
         break;
 
       case "toggleSidePanel":
-        console.log("toggleSidePanel", message.data);
         if (message.data) {
           chrome.sidePanel.open({
             windowId: sender.tab?.windowId ?? chrome.windows.WINDOW_ID_CURRENT,
@@ -65,18 +76,22 @@ async function handleMessage(
         break;
 
       case "checkLoginStatus":
-        const cookie = await chrome.cookies.get({
-          url: "http://localhost:5173",
-          name: "token",
-        });
-
-        if (!cookie?.value) {
-          sendResponse({ success: true, data: null });
-          break;
-        }
-
         try {
-          const response = await fetch("http://localhost:3000/user", {
+          const cookie = await chrome.cookies.get({
+            url: `${backendApiUrl}`,
+            name: "token",
+          });
+          if (!cookie?.value) {
+            await ExtensionStorage.clearUserInfo();
+            sendResponse({ success: true, data: null });
+            break;
+          }
+          const cachedUserInfo = await ExtensionStorage.getUserInfo();
+          if (cachedUserInfo?.islogin) {
+            sendResponse({ success: true, data: cachedUserInfo });
+            break;
+          }
+          const response = await fetch(`${backendApiUrl}/user`, {
             headers: {
               Authorization: `Bearer ${cookie.value}`,
             },
@@ -84,7 +99,19 @@ async function handleMessage(
 
           if (response.ok) {
             const userData = await response.json();
-            sendResponse({ success: true, data: userData });
+            console.log("userData", userData);
+            if (userData?.code === 200) {
+              userInfo = {
+                islogin: true,
+                username: userData?.data?.user?.username ?? "",
+                avatar: userData?.data?.user?.avatar ?? "",
+              };
+              console.log("userInfo", userInfo);
+              await ExtensionStorage.saveUserInfo(userInfo);
+              sendResponse({ success: true, data: userInfo });
+            } else {
+              sendResponse({ success: true, data: null });
+            }
           } else {
             sendResponse({ success: true, data: null });
           }
@@ -95,12 +122,19 @@ async function handleMessage(
         break;
 
       default:
-        sendResponse({ success: false, error: "未知的操作类型" });
+        sendResponse({
+          success: false,
+          action: message.action,
+          data: message.data,
+          error: "未知的操作类型",
+        });
     }
   } catch (error) {
-    console.error("Background script error:", error);
+    // console.error("Background script error:", error);
     sendResponse({
       success: false,
+      action: message.action,
+      data: message.data,
       error: error instanceof Error ? error.message : "未知错误",
     });
   }

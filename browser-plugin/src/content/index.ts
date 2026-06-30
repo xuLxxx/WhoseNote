@@ -70,6 +70,47 @@ function getPageInfo(): PageInfo {
   };
 }
 
+// 获取页面内容（用于摘要）
+function getPageContent(): string {
+  const selectors = [
+    "article",
+    "main",
+    "[role='main']",
+    ".article-content",
+    ".post-content",
+    ".entry-content",
+    ".content",
+    ".body-content",
+    "#content",
+    ".story-body",
+    ".article-body",
+    ".news-content",
+  ];
+
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      return (element as HTMLElement).innerText.trim();
+    }
+  }
+
+  const bodyText = document.body.innerText;
+  const textLength = bodyText.length;
+  if (textLength > 5000) {
+    return bodyText.substring(0, 5000) + "...";
+  }
+  return bodyText.trim();
+}
+
+// 获取选中内容
+function getSelection(): string {
+  const selection = window.getSelection();
+  if (selection && selection.toString().trim()) {
+    return selection.toString().trim();
+  }
+  return "";
+}
+
 // 切换暗色模式
 function toggleDarkMode(enabled: boolean): void {
   if (enabled) {
@@ -106,6 +147,16 @@ function handleMessage(
       case "toggleDarkMode":
         toggleDarkMode(message.data.enabled);
         sendResponse({ success: true });
+        return true;
+
+      case "getPageContent":
+        const pageContent = getPageContent();
+        sendResponse({ success: true, data: pageContent });
+        return true;
+
+      case "getSelection":
+        const selectionText = getSelection();
+        sendResponse({ success: true, data: selectionText });
         return true;
 
       default:

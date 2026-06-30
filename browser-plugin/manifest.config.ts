@@ -16,7 +16,7 @@ export default defineManifest({
     type: "module",
   },
   action: {
-    default_title: "Whose.Note",
+    default_title: "Whose Note",
     default_icon: {
       16: "public/icons/icon16.png",
       32: "public/icons/icon32.png",
@@ -35,15 +35,8 @@ export default defineManifest({
       run_at: "document_end",
     },
   ],
-  permissions: [
-    "sidePanel",
-    "tabs",
-    "storage",
-    "cookies",
-    "contentSettings",
-    "contextMenus",
-  ],
-  host_permissions: ["http://localhost/*"],
+  permissions: ["sidePanel", "tabs", "storage", "cookies", "contentSettings", "contextMenus"],
+  host_permissions: ["http://localhost:3000/*", "http://localhost:5173/*"],
   side_panel: {
     default_path: "src/sidepanel/index.html",
   },

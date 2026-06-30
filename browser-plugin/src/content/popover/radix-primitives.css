@@ -139,8 +139,8 @@ input {
   vertical-align: middle;
   overflow: hidden;
   user-select: none;
-  width: 45px;
-  height: 45px;
+  width: 32px;
+  height: 32px;
   border-radius: 100%;
   background-color: var(--black-a3);
 }
@@ -247,4 +247,12 @@ input {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* -- Popover Header */
+.PopoverHeader {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
 }

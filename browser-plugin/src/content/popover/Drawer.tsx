@@ -6,7 +6,7 @@ import React from "react";
 
 interface UserInfo {
   id: string;
-  name: string;
+  username: string;
   avatar?: string;
 }
 
@@ -16,11 +16,7 @@ interface DrawerProps {
   hidePopOver?: Function;
 }
 
-export const Drawer = ({
-  trigger,
-  triggerClassName,
-  hidePopOver,
-}: DrawerProps) => {
+export const Drawer = ({ trigger, triggerClassName, hidePopOver }: DrawerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +34,9 @@ export const Drawer = ({
       hidePopOver?.();
     }
   };
+  const handleLogin = () => {
+    window.open(`${import.meta.env.VITE_CLIENT_API_URL}`, "_blank");
+  };
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -46,7 +45,6 @@ export const Drawer = ({
         const response = await chrome.runtime.sendMessage({
           action: "checkLoginStatus",
         });
-
         if (response.success) {
           setUserInfo(response.data);
         } else {
@@ -60,56 +58,40 @@ export const Drawer = ({
       }
     };
 
-    checkLoginStatus();
-  }, [isOpen]);
+    if (userInfo === null) checkLoginStatus();
+  }, [isOpen, userInfo]);
 
   return (
     <Popover.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
-        <div
-          className={`PopoverTrigger ${triggerClassName}`}
-          onClick={handleClickTrigger}
-        >
+        <div className={`PopoverTrigger ${triggerClassName}`} onClick={handleClickTrigger}>
           {trigger}
         </div>
       </Popover.Trigger>
       <Popover.Portal container={document.documentElement}>
-        <Popover.Content
-          className="PopoverContent"
-          side="right"
-          sideOffset={5}
-          style={{ zIndex: 2147483637 }}
-        >
-          <div style={{ display: "flex", gap: 20 }}>
+        <Popover.Content className="PopoverContent" side="right" sideOffset={5} style={{ zIndex: 2147483637 }}>
+          <header className="PopoverHeader">
             {isLoading ? (
               <>加载中...</>
             ) : userInfo ? (
               <>
                 <Avatar.Root className="AvatarRoot">
                   {userInfo.avatar ? (
-                    <Avatar.Image
-                      className="AvatarImage"
-                      src={userInfo.avatar}
-                      alt={userInfo.name}
-                    />
+                    <Avatar.Image className="AvatarImage" src={userInfo.avatar} alt={userInfo.username} />
                   ) : null}
-                  <Avatar.Fallback className="AvatarFallback" delayMs={600}>
-                    {userInfo.name.charAt(0).toUpperCase()}
-                  </Avatar.Fallback>
+                  <Avatar.Fallback className="AvatarFallback">WN</Avatar.Fallback>
                 </Avatar.Root>
-                <>{userInfo.name}</>
+                <>{userInfo.username}</>
               </>
             ) : (
-              <>
-                <Avatar.Root className="AvatarRoot">
-                  <Avatar.Fallback className="AvatarFallback" delayMs={600}>
-                    U
-                  </Avatar.Fallback>
-                </Avatar.Root>
-                <>未登录</>
-              </>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}
+                onClick={() => handleLogin()}>
+                <Avatar.Root className="AvatarRoot"></Avatar.Root>
+                <>未登录，点击前往登录</>
+              </div>
             )}
-          </div>
+          </header>
           <Popover.Close className="PopoverClose" aria-label="Close">
             <Cross2Icon />
           </Popover.Close>
