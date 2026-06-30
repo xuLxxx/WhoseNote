@@ -20,6 +20,22 @@ declare global {
         monitor?: (manager: any) => void;
       }) => Promise<any>;
     };
+    Translator?: {
+      availability: (options?: {
+        sourceLanguage?: string;
+        targetLanguage?: string;
+      }) => Promise<"available" | "downloadable" | "unavailable">;
+      create: (options: {
+        sourceLanguage: string;
+        targetLanguage: string;
+        monitor?: (manager: any) => void;
+      }) => Promise<any>;
+    };
+    LanguageDetector?: {
+      availability: () => Promise<"available" | "downloadable" | "unavailable">;
+      create: (options: { monitor?: (manager: any) => void }) => Promise<any>;
+      detect: (text: string) => Promise<string>;
+    };
   }
 }
 

@@ -42,6 +42,58 @@ const TABS: Tab[] = [
   },
 ];
 
+const LANGUAGES = [
+  { value: "en", label: "英语" },
+  { value: "zh", label: "中文" },
+  { value: "ja", label: "日语" },
+  { value: "ko", label: "韩语" },
+  { value: "fr", label: "法语" },
+  { value: "de", label: "德语" },
+  { value: "es", label: "西班牙语" },
+  { value: "ru", label: "俄语" },
+  { value: "pt", label: "葡萄牙语" },
+  { value: "it", label: "意大利语" },
+  { value: "ar", label: "阿拉伯语" },
+  { value: "hi", label: "印地语" },
+  { value: "th", label: "泰语" },
+  { value: "vi", label: "越南语" },
+  { value: "id", label: "印度尼西亚语" },
+  { value: "tr", label: "土耳其语" },
+  { value: "nl", label: "荷兰语" },
+  { value: "sv", label: "瑞典语" },
+  { value: "da", label: "丹麦语" },
+  { value: "fi", label: "芬兰语" },
+  { value: "no", label: "挪威语" },
+  { value: "pl", label: "波兰语" },
+  { value: "cs", label: "捷克语" },
+  { value: "ro", label: "罗马尼亚语" },
+  { value: "hu", label: "匈牙利语" },
+  { value: "bg", label: "保加利亚语" },
+  { value: "hr", label: "克罗地亚语" },
+  { value: "sk", label: "斯洛伐克语" },
+  { value: "sl", label: "斯洛文尼亚语" },
+  { value: "lt", label: "立陶宛语" },
+  { value: "uk", label: "乌克兰语" },
+  { value: "el", label: "希腊语" },
+  { value: "he", label: "希伯来语" },
+  { value: "bn", label: "孟加拉语" },
+  { value: "ta", label: "泰米尔语" },
+  { value: "te", label: "泰卢固语" },
+  { value: "kn", label: "卡纳达语" },
+  { value: "mr", label: "马拉地语" },
+  { value: "zh-Hant", label: "繁体中文" },
+];
+
+const LANGUAGES_MAP = new Map(
+  [
+    ...[
+      { value: "zh-Hans", label: "简体中文" },
+      { value: "lzh", label: "文言文" },
+    ],
+    ...LANGUAGES,
+  ].map((item) => [item.value, item.label]),
+);
+
 interface UserInfo {
   islogin: boolean;
   username: string;
@@ -56,13 +108,22 @@ export default function SidePannel() {
     avatar: "",
   });
   const [isLoading, setIsLoading] = useState(true);
-
+  const [hasTranslatorAbility, setHasTranslatorAbility] = useState(false);
   const [hasSummaryAbility, setHasSummaryAbility] = useState(false);
+  const [hasLanguageDetectAbility, setHasLanguageDetectAbility] = useState(false);
 
   const init = async () => {
     if ("Summarizer" in self) {
       // The Summarizer API is supported.
       setHasSummaryAbility(true);
+    }
+    if ("Translator" in self) {
+      // The Translator API is supported.
+      setHasTranslatorAbility(true);
+    }
+    if ("LanguageDetect" in self) {
+      // The LanguageDetect API is supported.
+      setHasLanguageDetectAbility(true);
     }
     // 检查用户是否登录
     const response = await chrome.runtime.sendMessage({
@@ -74,7 +135,7 @@ export default function SidePannel() {
     }
     setUserInfo({
       ...userInfo,
-      islogin: response.data.success,
+      islogin: response.success,
       username: response.data?.username || "",
       avatar: response.data?.avatar || "",
     });
@@ -89,13 +150,309 @@ export default function SidePannel() {
     switch (tabValue) {
       case "summarizer":
         return <SummarizerContent hasSummaryAbility={hasSummaryAbility} />;
-      //   case "translator":
-      //     return <TranslatorContent />;
+      case "translator":
+        return (
+          <TranslatorContent
+            hasTranslatorAbility={hasTranslatorAbility}
+            hasLanguageDetectAbility={hasLanguageDetectAbility}
+          />
+        );
       case "setting":
         return <SettingContent />;
       default:
         return null;
     }
+  };
+
+  const TranslatorContent = ({
+    hasTranslatorAbility,
+    hasLanguageDetectAbility,
+  }: {
+    hasTranslatorAbility: boolean;
+    hasLanguageDetectAbility: boolean;
+  }) => {
+    const [inputText, setInputText] = useState("");
+    const [translation, setTranslation] = useState("");
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [modelAvailable, setModelAvailable] = useState<ModelAvailability>(null);
+    const [detectModelAvailable, setDetectModelAvailable] = useState<ModelAvailability>(null);
+    const [translator, setTranslator] = useState<any>(null);
+    const [detector, setDetector] = useState<any>(null);
+    const [sourceLanguage, setSourceLanguage] = useState("auto");
+    const [targetLanguage, setTargetLanguage] = useState("zh");
+    const [detectLanguage, setDetectLanguage] = useState(null);
+
+    const checkAvailability = async () => {
+      try {
+        if (sourceLanguage === "auto" && !detectLanguage) {
+          console.log("请先检测语言");
+          return;
+        }
+        if (detectLanguage === targetLanguage) {
+          toast.warning("源语言和目标语言相同！");
+          return;
+        }
+        const availability = await window.Translator!.availability({
+          sourceLanguage: detectLanguage || sourceLanguage,
+          targetLanguage,
+        });
+        setModelAvailable(availability);
+        if (navigator.userActivation.isActive) {
+          console.log("用户激活", detectLanguage || sourceLanguage, targetLanguage);
+          const translator = await window.Translator!.create({
+            sourceLanguage: detectLanguage || sourceLanguage,
+            targetLanguage,
+          });
+          setTranslator(translator);
+        }
+      } catch (error) {
+        console.error("检查翻译模型可用性失败:", error);
+        setModelAvailable("unavailable");
+        return "unavailable";
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const initLangaugeDetector = async () => {
+      try {
+        const result = await window.LanguageDetector!.availability();
+        setDetectModelAvailable(result);
+        console.log("initLangaugeDetector", result);
+        const detector = await window.LanguageDetector!.create({
+          monitor(m: any) {
+            m.addEventListener("downloadprogress", (e: any) => {
+              setDownloadProgress(Math.round(e.loaded * 100));
+            });
+          },
+        });
+        setDetector(detector);
+      } catch (error) {
+        console.error("初始化语言检测器失败:", error);
+        toast.error("初始化语言检测器失败: " + (error as Error).message);
+      }
+    };
+
+    useEffect(() => {
+      if (sourceLanguage !== "auto") {
+        setDetectLanguage(null);
+      }
+      if (sourceLanguage === targetLanguage) {
+        toast.warning("源语言和目标语言不能相同");
+        return;
+      }
+      console.log("检查翻译模型可用性:", sourceLanguage, targetLanguage);
+      checkAvailability();
+    }, [sourceLanguage, targetLanguage, detectLanguage]);
+
+    const handleDetectLanguage = async (text: string) => {
+      if (!detector || !text.trim()) {
+        setDetectLanguage(null);
+        return;
+      }
+      const result = await detector.detect(text);
+      setDetectLanguage(result[0].detectedLanguage);
+      //   console.log("检测到的语言:", result[0].detectedLanguage);
+    };
+
+    useEffect(() => {
+      if (sourceLanguage === "auto") {
+        if (detector) {
+          handleDetectLanguage(inputText);
+        }
+      }
+    }, [sourceLanguage, inputText, detector]);
+
+    useEffect(() => {
+      initLangaugeDetector();
+    }, []);
+
+    const handleTranslate = async () => {
+      if (!inputText.trim()) {
+        toast.warning("请输入要翻译的文本");
+        return;
+      }
+
+      if (!translator) {
+        console.log("请先初始化翻译模型");
+        return;
+      }
+
+      try {
+        setIsTranslating(true);
+        setTranslation("");
+
+        const result = await translator.translate(inputText);
+        setTranslation(result);
+      } catch (error) {
+        console.error("翻译失败:", error);
+        toast.error("翻译失败: " + (error as Error).message);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+
+    const handleTranslateStreaming = async () => {
+      if (!inputText.trim()) {
+        toast.warning("请输入要翻译的文本");
+        return;
+      }
+
+      if (!translator) {
+        toast.warning("初始化翻译模型出错");
+        return;
+      }
+
+      try {
+        setIsTranslating(true);
+        setTranslation("");
+
+        const stream = translator.translateStreaming(inputText);
+        for await (const chunk of stream) {
+          setTranslation((prev) => prev + chunk);
+        }
+      } catch (error) {
+        console.error("翻译失败:", error);
+        toast.error("翻译失败: " + (error as Error).message);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+
+    const handleGetPageContent = async () => {
+      try {
+        const response = await chrome.runtime.sendMessage({
+          action: "getPageContent",
+        });
+        if (response.success && response.data) {
+          setInputText(response.data);
+        } else {
+          toast.error("获取页面内容失败");
+        }
+      } catch (error) {
+        console.error("获取页面内容失败:", error);
+        toast.error("获取页面内容失败");
+      }
+    };
+
+    const handleGetSelection = async () => {
+      try {
+        const response = await chrome.runtime.sendMessage({
+          action: "getSelection",
+        });
+        if (response.success && response.data) {
+          setInputText(response.data);
+        } else {
+          toast.warning("未选中任何内容");
+        }
+      } catch (error) {
+        console.error("获取选中内容失败:", error);
+        toast.error("获取选中内容失败");
+      }
+    };
+
+    return (
+      <div className="flex flex-col p-4 h-full">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">翻译</h2>
+        </div>
+
+        {modelAvailable === "unavailable" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <p>当前浏览器不支持翻译功能</p>
+              <p className="text-sm mt-2">需要 Chrome 138 或更高版本</p>
+            </div>
+          </div>
+        )}
+
+        {modelAvailable === "downloading" && (
+          <div className="flex-1 flex flex-col gap-4">
+            {downloadProgress > 0 && downloadProgress < 100 && (
+              <div className="p-4">
+                <div className="flex justify-between text-sm mb-2">
+                  <span>模型下载进度</span>
+                  <span>{downloadProgress}%</span>
+                </div>
+                <Progress value={downloadProgress} className="h-2" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {
+          <>
+            <div className="flex gap-2 mb-2">
+              <Select value={sourceLanguage} onValueChange={(value) => setSourceLanguage(value)}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="源语言" />
+                </SelectTrigger>
+                <SelectContent>
+                  {
+                    <SelectItem key="auto" value="auto">
+                      {detectLanguage && LANGUAGES_MAP.get(detectLanguage)
+                        ? "自动检测(" + LANGUAGES_MAP.get(detectLanguage) + ")"
+                        : "自动检测"}
+                    </SelectItem>
+                  }
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={targetLanguage} onValueChange={(value) => setTargetLanguage(value)}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="目标语言" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.filter((lang) => lang.value !== "auto" && lang.value !== sourceLanguage).map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2 mb-2">
+              <Button variant="outline" size="sm" onClick={handleGetPageContent} className="flex-1">
+                获取页面内容
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleGetSelection} className="flex-1">
+                获取选中内容
+              </Button>
+            </div>
+
+            <Textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={"请输入要翻译的文本..."}
+              disabled={isTranslating}
+              className="flex-1 min-h-[120px] resize-none text-sm"
+            />
+
+            <div className="flex gap-2 mt-2">
+              <Button onClick={handleTranslate} disabled={isTranslating} className="flex-1">
+                {isTranslating ? "翻译中..." : "翻译"}
+              </Button>
+              <Button variant="outline" disabled={isTranslating} onClick={handleTranslateStreaming} className="flex-1">
+                流式翻译
+              </Button>
+            </div>
+
+            {translation && (
+              <div className="flex-1 border rounded-lg p-3 mt-2">
+                <h3 className="text-sm font-semibold mb-2">翻译结果</h3>
+                <p className="text-sm whitespace-pre-wrap">{translation}</p>
+              </div>
+            )}
+          </>
+        }
+      </div>
+    );
   };
 
   const SummarizerContent = ({ hasSummaryAbility }: { hasSummaryAbility: boolean }) => {
@@ -135,8 +492,6 @@ export default function SidePannel() {
     const checkAvailability = async () => {
       try {
         const availability = await window.Summarizer!.availability();
-        console.log("模型可用性:", availability);
-        // await LanguageModel.availability({ languages: ["en", "ja"] });
         setModelAvailable(availability);
         return availability;
       } catch (error) {
@@ -467,7 +822,8 @@ export default function SidePannel() {
     <>
       <div className="flex max-w-screen h-screen">
         <div className="grow">
-          {isLoading ? null : <ScrollArea className="h-full">{renderTabContent()}</ScrollArea>}
+          {isLoading && <Spinner />}
+          {!isLoading && userInfo.islogin && <ScrollArea className="h-full">{renderTabContent()}</ScrollArea>}
           {!isLoading && !userInfo.islogin && <div className="text-center text-red-500">请先登录</div>}
         </div>
         <div className="flex h-full align-start justify-center grow shrink max-w-fit basis-[30px] border-l">
