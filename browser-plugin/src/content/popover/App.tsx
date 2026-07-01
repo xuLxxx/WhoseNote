@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import "./app.css";
 import { PopButton } from "./PopButton";
 import { Drawer } from "./Drawer";
 import { ViewVerticalIcon } from "@radix-ui/react-icons";
@@ -205,8 +204,7 @@ export function PopoverApp(): React.ReactNode {
         left: adsorption === "left" ? 0 : "auto",
         right: adsorption === "right" ? 0 : "auto",
         top: 0,
-      }}
-    >
+      }}>
       <div
         ref={dragRef}
         className="drag-animation"
@@ -222,14 +220,13 @@ export function PopoverApp(): React.ReactNode {
           right: adsorption === "right" ? 0 : "auto",
           transform: "translate3d(0, 0, 0)",
           opacity: isDragging ? 0 : 1,
-        }}
-      >
+        }}>
         <PopButton onClick={() => toggleSidePanel()}>
           <ViewVerticalIcon style={{ width: "100%" }} />
         </PopButton>
         <Drawer
           hidePopOver={hidePopOver}
-          trigger={<PopButton icon="&#xe601;"></PopButton>}
+          trigger={<PopButton icon="icon-a-shezhi1"></PopButton>}
           triggerClassName="pop-drawer"
         />
       </div>

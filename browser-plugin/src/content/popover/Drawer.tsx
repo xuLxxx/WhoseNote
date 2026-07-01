@@ -1,6 +1,6 @@
 import { Avatar, Popover } from "radix-ui";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import "./radix-primitives.css";
+import styles from "./radix-primitives.module.css";
 import { useState, useEffect } from "react";
 import React from "react";
 
@@ -64,22 +64,22 @@ export const Drawer = ({ trigger, triggerClassName, hidePopOver }: DrawerProps) 
   return (
     <Popover.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
-        <div className={`PopoverTrigger ${triggerClassName}`} onClick={handleClickTrigger}>
+        <div className={`${styles.PopoverTrigger} ${triggerClassName}`} onClick={handleClickTrigger}>
           {trigger}
         </div>
       </Popover.Trigger>
       <Popover.Portal container={document.documentElement}>
-        <Popover.Content className="PopoverContent" side="right" sideOffset={5} style={{ zIndex: 2147483637 }}>
-          <header className="PopoverHeader">
+        <Popover.Content className={styles.PopoverContent} side="right" sideOffset={5} style={{ zIndex: 2147483637 }}>
+          <header className={styles.PopoverHeader}>
             {isLoading ? (
               <>加载中...</>
             ) : userInfo ? (
               <>
-                <Avatar.Root className="AvatarRoot">
+                <Avatar.Root className={styles["AvatarRoot"]}>
                   {userInfo.avatar ? (
-                    <Avatar.Image className="AvatarImage" src={userInfo.avatar} alt={userInfo.username} />
+                    <Avatar.Image className={styles["AvatarImage"]} src={userInfo.avatar} alt={userInfo.username} />
                   ) : null}
-                  <Avatar.Fallback className="AvatarFallback">WN</Avatar.Fallback>
+                  <Avatar.Fallback className={styles["AvatarFallback"]}>WN</Avatar.Fallback>
                 </Avatar.Root>
                 <>{userInfo.username}</>
               </>
@@ -87,15 +87,15 @@ export const Drawer = ({ trigger, triggerClassName, hidePopOver }: DrawerProps) 
               <div
                 style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}
                 onClick={() => handleLogin()}>
-                <Avatar.Root className="AvatarRoot"></Avatar.Root>
+                <Avatar.Root className={styles["AvatarRoot"]}></Avatar.Root>
                 <>未登录，点击前往登录</>
               </div>
             )}
           </header>
-          <Popover.Close className="PopoverClose" aria-label="Close">
+          <Popover.Close className={styles.PopoverClose} aria-label="Close">
             <Cross2Icon />
           </Popover.Close>
-          <Popover.Arrow className="PopoverArrow" />
+          <Popover.Arrow className={styles.PopoverArrow} />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

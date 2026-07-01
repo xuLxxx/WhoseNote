@@ -1,15 +1,49 @@
-@font-face {
-  font-family: "iconfont";
-  /* Project id 4843413 */
-  src:
-    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff2?t=1746947794909")
-      format("woff2"),
-    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff?t=1746947794909")
-      format("woff"),
-    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.ttf?t=1746947794909")
-      format("truetype"),
-    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.svg?t=1746947794909#iconfont")
-      format("svg");
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-tongzhi:before {
+  content: "\e609";
+}
+
+.icon-yuanxingxuanzhong:before {
+  content: "\e607";
+}
+
+.icon-yuanxingweixuanzhong:before {
+  content: "\e608";
+}
+
+.icon-Todo:before {
+  content: "\e606";
+}
+
+.icon-a-shezhi1:before {
+  content: "\e601";
+}
+
+.icon-yaoqinghaoyou:before {
+  content: "\e602";
+}
+
+.icon-shouye_1_:before {
+  content: "\e603";
+}
+
+.icon-pos:before {
+  content: "\e604";
+}
+
+.icon-renqun:before {
+  content: "\e605";
+}
+
+button {
+  all: unset;
 }
 
 .iconfont {
@@ -21,11 +55,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/** 基础色阶定义 **/
-:root,
-#mount[data-theme="light"],
-#mount:not([data-theme="dark"]) {
-  /* 中性灰阶（light） */
+:host {
   --c-00: #000000;
   --c-22: #222222;
   --c-33: #333333;
@@ -37,7 +67,6 @@
   --c-e6: #e6e6e6;
   --c-f5: #f5f5f5;
   --c-ff: #ffffff;
-  /* 品牌主色阶（light） */
   --p-main: #ea4c89;
   --p-hover: #ec5e95;
   --p-active: #e34a85;
@@ -45,91 +74,45 @@
   --p-disabled: #f4a5c4;
   --p-text-disabled: #f9c9dc;
   --p-weak: #fdedf3;
-  /* Surface 层级（light，TC 填充-1） */
   --s-1: #f3f5f6;
   --s-1-hover: #f6f8f9;
   --s-1-active: #edf1f2;
   --s-1-weak: #fafbfb;
-  /* 输入/边框（light，TC 填充-2） */
   --input-bg-base: #fafbfc;
   --input-border: #ecf0f7;
   --input-border-strong: #e0e0e6;
   --input-bg-strong: #fafdff;
-}
-
-:root[data-theme="dark"],
-[data-theme="dark"] {
-  /* 中性灰阶（dark） */
-  --c-00: #ffffff;
-  --c-22: #dbdbdb;
-  --c-33: #dbdbdb;
-  --c-66: #b3b3b3;
-  --c-83: #838383;
-  --c-99: #707070;
-  --c-c7: #666666;
-  --c-cc: #5c5c5c;
-  --c-e6: #3b3b3b;
-  --c-f5: #262626;
-  --c-ff: #222222;
-  /* 品牌主色阶（dark） */
-  --p-main: #e23c7c;
-  --p-hover: #ea4c89;
-  --p-active: #d5467d;
-  --p-special: #a93a65;
-  --p-disabled: #7e2f4d;
-  --p-text-disabled: #522335;
-  --p-weak: #26171d;
-  /* Surface 层级（dark，TC 填充-1） */
-  --s-1: #2d2e2f;
-  --s-1-hover: #323434;
-  --s-1-active: #202121;
-  --s-1-weak: #262627;
-  /* 输入/边框（dark，TC 填充-2） */
-  --input-bg-base: #2b2d30;
-  --input-border: #3e434b;
-  --input-border-strong: #43474b;
-  --input-bg-strong: #1f2123;
-}
-
-:root,
-#mount [data-theme] {
-  /* 业务/通用变量引用色阶（全局可见，含 Shadow DOM） */
-  --primary: var(--p-main);
-  --primary-hover: var(--p-hover);
+  --primary: #ea4c89;
+  --primary-hover: #ec5e95;
   --primary-inverse: #fff;
-  --modal-background: var(--s-1);
-  --modal-border: var(--input-border);
-  --modal-text: var(--c-22);
-  --modal-text-secondary: var(--c-66);
-  --modal-error: var(--p-main);
+  --modal-background: #f3f5f6;
+  --modal-border: #ecf0f7;
+  --modal-text: #222222;
+  --modal-text-secondary: #666666;
+  --modal-error: #ea4c89;
   --modal-required: #f53f3f;
   --modal-success: #68cd52;
-  --modal-button-background: var(--p-main);
-  --modal-button-text: var(--c-ff);
-  --modal-input-background: var(--input-bg-base);
-  --modal-check-color: var(--p-main);
-  --background-color: var(--c-ff);
-  --background-light-green: var(--s-1-weak, #f5f7f9);
-  --text-black-2: var(--c-22);
-  --text-gray-2: var(--c-22);
-  --text-gray-6: var(--c-66);
-  --text-gray-9: var(--c-99);
-  --text-gray-c2: var(--c-c7);
-  --switch-background-color: var(--c-c7, hsl(205deg, 16%, 77%));
-  --float-ball-more-button-border-color: var(--c-f5, #f6f6f6);
-  --float-ball-more-button-background-color: var(--c-ff);
-  --float-ball-more-button-hover-color: var(--p-weak);
+  --modal-button-background: #ea4c89;
+  --modal-button-text: #ffffff;
+  --modal-input-background: #fafbfc;
+  --modal-check-color: #ea4c89;
+  --background-color: #ffffff;
+  --background-light-green: #fafbfb;
+  --text-black-2: #222222;
+  --text-gray-2: #222222;
+  --text-gray-6: #666666;
+  --text-gray-9: #999999;
+  --text-gray-c2: #c7c7c7;
+  --switch-background-color: #c7c7c7;
+  --float-ball-more-button-border-color: #f5f5f5;
+  --float-ball-more-button-background-color: #ffffff;
+  --float-ball-more-button-hover-color: #fdedf3;
   --float-ball-more-button-svg-color: #6c6f73;
-  --service-bg-hover: var(--s-1-hover, #f7faff);
-  --service-bg: var(--s-1-weak, #fafbfb);
-}
-
-#mount {
+  --service-bg-hover: #f6f8f9;
+  --service-bg: #fafbfb;
   --font-family:
-    system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu", "Cantarell",
-    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
-  /* PC/H5 兼容的字号、间距、圆角、阴影变量 */
+    system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu", "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --f-12: 12px;
   --f-14: 14px;
   --f-15: 15px;
@@ -157,8 +140,6 @@
   --width-16: 16px;
   --width-label-md: 56px;
   --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.12);
-
-  /* 常规变量 */
   --line-height: 1.5;
   --font-weight: 400;
   --font-size: 16px;
@@ -183,11 +164,127 @@
   --switch-color: var(--primary-inverse);
   --switch-checked-background-color: var(--primary);
   --icon-xia: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9IkZyYW1lIj4KPHBhdGggaWQ9IlZlY3RvciIgZD0iTTguMDAyOTEgOS42Nzk4M0wzLjgzMzM5IDUuNTEyMjFMMy4wMjUzOSA2LjMxOTgzTDguMDAzMjkgMTEuMjk1MUwxMi45NzYyIDYuMzE5ODNMMTIuMTY3OSA1LjUxMjIxTDguMDAyOTEgOS42Nzk4M1oiIGZpbGw9IiM4MzgzODMiLz4KPC9nPgo8L3N2Zz4K");
-  /* 兼容旧变量：主色直接引用品牌主色阶 */
+  line-height: var(--line-height);
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+}
+
+:host([data-theme="dark"]) {
+  --c-00: #ffffff;
+  --c-22: #dbdbdb;
+  --c-33: #dbdbdb;
+  --c-66: #b3b3b3;
+  --c-83: #838383;
+  --c-99: #707070;
+  --c-c7: #666666;
+  --c-cc: #5c5c5c;
+  --c-e6: #3b3b3b;
+  --c-f5: #262626;
+  --c-ff: #222222;
+  --p-main: #e23c7c;
+  --p-hover: #ea4c89;
+  --p-active: #d5467d;
+  --p-special: #a93a65;
+  --p-disabled: #7e2f4d;
+  --p-text-disabled: #522335;
+  --p-weak: #26171d;
+  --s-1: #2d2e2f;
+  --s-1-hover: #323434;
+  --s-1-active: #202121;
+  --s-1-weak: #262627;
+  --input-bg-base: #2b2d30;
+  --input-border: #3e434b;
+  --input-border-strong: #43474b;
+  --input-bg-strong: #1f2123;
+}
+
+@media (max-width: 480px) {
+  :host {
+    --f-12: 10px;
+    --f-14: 12px;
+    --f-15: 13px;
+    --f-16: 14px;
+    --f-18: 16px;
+    --f-20: 18px;
+    --space-4: 4px;
+    --space-6: 4px;
+    --space-8: 6px;
+    --space-12: 8px;
+    --space-16: 12px;
+    --space-18: 14px;
+    --space-24: 18px;
+    --radius-8: 6px;
+    --radius-12: 10px;
+    --radius-16: 12px;
+    --control-height-lg: 38px;
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+    --width-28: 24px;
+    --width-24: 20px;
+    --width-20: 16px;
+    --width-18: 14px;
+    --width-16: 12px;
+    --width-label-md: 52px;
+  }
+}
+
+#mount {
+  --font-family:
+    system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu", "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --f-12: 12px;
+  --f-14: 14px;
+  --f-15: 15px;
+  --f-16: 16px;
+  --f-18: 18px;
+  --f-20: 20px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-24: 24px;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --infinity: 9999px;
+  --control-height-lg: 44px;
+  --width-40: 40px;
+  --width-32: 32px;
+  --width-28: 28px;
+  --width-24: 24px;
+  --width-20: 20px;
+  --width-18: 18px;
+  --width-16: 16px;
+  --width-label-md: 56px;
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --line-height: 1.5;
+  --font-weight: 400;
+  --font-size: 16px;
+  --border-radius: 4px;
+  --border-width: 2px;
+  --outline-width: 3px;
+  --spacing: 16px;
+  --typography-spacing-vertical: 24px;
+  --block-spacing-vertical: calc(var(--spacing) * 2);
+  --block-spacing-horizontal: var(--spacing);
+  --grid-spacing-vertical: 0;
+  --grid-spacing-horizontal: var(--spacing);
+  --form-element-spacing-vertical: 12px;
+  --form-element-spacing-horizontal: 16px;
+  --nav-element-spacing-vertical: 16px;
+  --nav-element-spacing-horizontal: 8px;
+  --nav-link-spacing-vertical: 8px;
+  --nav-link-spacing-horizontal: 8px;
+  --form-label-font-weight: var(--font-weight);
+  --transition: 0.2s ease-in-out;
+  --modal-overlay-backdrop-filter: blur(4px);
+  --switch-color: var(--primary-inverse);
+  --switch-checked-background-color: var(--primary);
+  --icon-xia: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9IkZyYW1lIj4KPHBhdGggaWQ9IlZlY3RvciIgZD0iTTguMDAyOTEgOS42Nzk4M0wzLjgzMzM5IDUuNTEyMjFMMy4wMjUzOSA2LjMxOTgzTDguMDAzMjkgMTEuMjk1MUwxMi45NzYyIDYuMzE5ODNMMTIuMTY3OSA1LjUxMjIxTDguMDAyOTEgOS42Nzk4M1oiIGZpbGw9IiM4MzgzODMiLz4KPC9nPgo8L3N2Zz4K");
   --primary: var(--p-main);
   --primary-hover: var(--p-hover);
   --primary-inverse: #fff;
-  /* Modal 业务变量引用色阶 */
   --modal-background: var(--s-1);
   --modal-border: var(--input-border);
   --modal-text: var(--c-22);
@@ -218,41 +315,11 @@
   font-size: var(--font-size);
 }
 
-@media (max-width: 480px) {
-  :root,
-  #mount {
-    --f-12: 10px;
-    --f-14: 12px;
-    --f-15: 13px;
-    --f-16: 14px;
-    --f-18: 16px;
-    --f-20: 18px;
-    --space-4: 4px;
-    --space-6: 4px;
-    --space-8: 6px;
-    --space-12: 8px;
-    --space-16: 12px;
-    --space-18: 14px;
-    --space-24: 18px;
-    --radius-8: 6px;
-    --radius-12: 10px;
-    --radius-16: 12px;
-    --control-height-lg: 38px;
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
-    --width-28: 24px;
-    --width-24: 20px;
-    --width-20: 16px;
-    --width-18: 14px;
-    --width-16: 12px;
-    --width-label-md: 52px;
-  }
-}
-
 #mount * {
   box-sizing: border-box;
 }
 
-[hidden] {
+:host [hidden] {
   display: none !important;
 }
 
@@ -346,8 +413,8 @@
   accent-color: var(--primary, #ea4c89);
 }
 
-[type="checkbox"],
-[type="radio"] {
+:host [type="checkbox"],
+:host [type="radio"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -366,17 +433,17 @@
   cursor: pointer;
 }
 
-[type="checkbox"]::-ms-check,
-[type="radio"]::-ms-check {
+:host [type="checkbox"]::-ms-check,
+:host [type="radio"]::-ms-check {
   display: none;
 }
 
-[type="checkbox"]:checked,
-[type="checkbox"]:checked:active,
-[type="checkbox"]:checked:focus,
-[type="radio"]:checked,
-[type="radio"]:checked:active,
-[type="radio"]:checked:focus {
+:host [type="checkbox"]:checked,
+:host [type="checkbox"]:checked:active,
+:host [type="checkbox"]:checked:focus,
+:host [type="radio"]:checked,
+:host [type="radio"]:checked:active,
+:host [type="radio"]:checked:focus {
   --background-color: var(--primary);
   --border-color: var(--primary);
   background-image: var(--icon-checkbox);
@@ -385,8 +452,8 @@
   background-repeat: no-repeat;
 }
 
-[type="checkbox"] ~ label,
-[type="radio"] ~ label {
+:host [type="checkbox"] ~ label,
+:host [type="radio"] ~ label {
   display: inline-block;
   margin-right: 0.375em;
   margin-bottom: 0;
@@ -398,6 +465,7 @@
   opacity: 0.8;
   width: var(--width-40);
   transition: opacity 0.1s ease;
+  z-index: 2147483637;
 }
 
 .drag-animation-container:hover {
@@ -415,6 +483,13 @@
   width: var(--width-40);
 }
 
+.pop-drawer {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
 .pop-button {
   display: inline-flex;
   align-items: center;
@@ -424,14 +499,24 @@
   box-sizing: border-box;
   padding: var(--space-4);
   border-radius: var(--infinity);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   line-height: 0;
-  /* padding: var(--space-4); */
+  border: 0;
+  background-color: #fff;
+  color: var(--primary, #ea4c89);
+  box-sizing: border-box;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
 }
 
-.pop-drawer {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 100%;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.pop-button button:hover {
+  background-color: #f289b181;
+}
+
+.pop-button button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

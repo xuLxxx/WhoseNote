@@ -1,11 +1,13 @@
 @import "@radix-ui/colors/black-alpha.css";
 @import "@radix-ui/colors/mauve.css";
 @import "@radix-ui/colors/violet.css";
-
-button,
-fieldset,
-input {
-  all: unset;
+@font-face {
+  font-family: "iconfont"; /* Project id 4843413 */
+  src:
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff2?t=1746947794909") format("woff2"),
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.woff?t=1746947794909") format("woff"),
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.ttf?t=1746947794909") format("truetype"),
+    url("//at.alicdn.com/t/c/font_4843413_zp757dp92pa.svg?t=1746947794909#iconfont") format("svg");
 }
 
 /* -- Popover */
@@ -20,6 +22,11 @@ input {
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
+
+  & button {
+    border: 0;
+    background-color: transparent;
+  }
 }
 
 .PopoverContent:focus {
@@ -72,6 +79,7 @@ input {
 }
 
 .IconButton {
+  all: unset;
   font-family: inherit;
   border-radius: 100%;
   display: inline-flex;

@@ -1,15 +1,21 @@
-# [Who's note](https://github.com/) &middot; ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
+# [Whose note](https://github.com/) &middot; ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## React + React Native + Express + TypeScript + TypeORM
 
-# 什么是 Who's note
+## CRX-JS + Radix UI + ShadcnUI 
 
-`Who's note`是个人全栈应用。具备**高度集成组件**特点。动态菜单(服务器返回菜单内容)，单向数据流管理主题明暗，菜单折叠，面包屑组件状态，Web 端使用 `React` 。移动端使用 `React Native` 。分别使用 Redux `@rematch/core` `@toolkit` 实现状态管理。路由使用 `React Router`，`expo-router`。
-`Who's note`是一个**笔记应用**，**主题切换，解析 markdown,上传 markdown,用户可以在日历、待办列表中快速增删事件，拖曳排序，快速筛选**
+# 2026年6月新版本 - 插件
 
-2026年6月版本
+新增浏览器插件，此插件目的为了实现AI赋能插件，使得用户可以在其他网页中使用AI进行生成摘要，翻译，检索笔记。
 
-- 新增浏览器插件，此插件目的为了实现AI赋能插件，使得用户可以在其他网页中使用AI进行检索笔记。
+- 使用Radix Primitive组件库完成插件内容脚本的UI，加快插件加载速度。
+- 使用Shadow DOM实现内容脚本的样式隔离。
+- 使用Google提供的客户端AI模型，实现生成摘要，翻译功能。客户端模型优势在于，不依赖服务器，速度更快，隐私保护更好。
+
+# 什么是 Whose note
+
+`Whose note`是个人全栈应用。具备**高度集成组件**特点。动态菜单(服务器返回菜单内容)，单向数据流管理主题明暗，菜单折叠，面包屑组件状态，Web 端使用 `React` 。移动端使用 `React Native` 。分别使用 Redux `@rematch/core` `@toolkit` 实现状态管理。路由使用 `React Router`，`expo-router`。
+`Whose note`是一个**笔记应用**，**主题切换，解析 markdown,上传 markdown,用户可以在日历、待办列表中快速增删事件，拖曳排序，快速筛选**
 
 # 如何初始化 Setup
 
@@ -42,7 +48,7 @@ JWT_SECRET=....
 - **主题切换** less 实现
 - api 由 express 提供并使用 typeorm 连接 PostgreSQL 数据库
 - 经实践验证、可扩展且易于理解的 Express 项目结构
-- 使用经典的 NodeJS & Vite 尽可能地构建轻量的项目，而不是使用脚手架
+- 使用经典的 NodeJS & Vite 尽可能地构建轻量的项目，而不是使用脚手架工具。
 - React 使用 Redux @rematch/core 管理状态，RN 使用 Redux @toolkit 分别提供了一个完整的学习 Redux 样例。
 - Axios + Redux **封装 LRU 缓存算法**来减少重复的 Get 请求。
 - multer 实现 Express **通用上传文件**功能。
@@ -52,13 +58,17 @@ JWT_SECRET=....
 - 日历组件支持事件的增删改查，拖曳修改事件时间，自定义样式，同步后端数据库存储。
 - 提供一个原生 JS 实现 Drag & Drop 功能的 Todo 组件。
 - Todo 组件支持筛选，拖曳排序，增删改查，同步后端数据库存储。
+- Google 客户端 AI 模型，浏览器插件实现生成摘要，翻译功能。
+- 提供一个拖曳自动吸附的悬浮球的实现思路，无依赖无冗余，可观的动画以及极少的bug。
+- 插件与网页端使用同一份cookie，实现用户登录状态的同步。
 
 # 评述 Observation
 
 - 这个项目的想法是提供一个学习路线，记录着我个人的学习，这个项目并不能媲美任何其他项目。
 - 其实并不需要 Redux,我只是想练习一下 Redux。完全可以通过 Simple local React state management 实现。例如 useReduce useContext 实现
-- 大多数的功能实现并不适合生产环境
+- Node.JS 后端大多数的功能实现并不适合生产环境
 - 一个简单但尽可能完整的 React Native
+- AI赋能的浏览器插件，使用了Google提供的客户端AI模型，实现生成摘要，翻译功能。
 
 # 截图 Screenshots
 
@@ -88,13 +98,11 @@ JWT_SECRET=....
 
 # 展望 | 未完成 | Future & Not Done Yet
 
-- [ ] 通过实现限制用户功能 完善 RBAC 情景
-- [ ] 通过修改用户信息 完善 CRUD 情景
-- [x] 完善基于 Websocket 的实时聊天功能、评论和实时聊天功能
+- [√] 完善基于 Websocket 的实时聊天功能、评论和实时聊天功能
 - [ ] 优化 markdown 内的图片上传
 - [ ] Docker 部署到服务器完成云存储等功能
 - [ ] React-Native Markdown 无法实现生成目录。
-- [ ] 认为可以使用 CodeMirror + unified 实现 更强悍 的 Web-Markdown 功能
+- [ ] 外置浏览器插件，实现AI赋能插件，使得用户可以在其他网页中使用AI进行检索笔记。
 
 # Repo Public
 

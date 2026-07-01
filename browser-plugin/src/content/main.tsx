@@ -8,6 +8,10 @@ import shadowDOMStyle from "./popover/app.css?raw";
 const container = document.createElement("div");
 container.id = "whose-note-draggablepopover-animation";
 container.style.all = "initial";
+container.style.position = "fixed";
+container.style.top = "0";
+container.style.left = "0";
+container.style.zIndex = "2147483637";
 const shadowRoot = container.attachShadow({ mode: "open" });
 const shadowDOMStyleSheet = new CSSStyleSheet();
 // const radixPrimitivesStyleSheet = new CSSStyleSheet();
@@ -20,6 +24,6 @@ document.documentElement.appendChild(container);
 
 createRoot(shadowRoot).render(
   <StrictMode>
-      <ShadowDOMApp />
+    <ShadowDOMApp />
   </StrictMode>,
 );
